@@ -1,6 +1,12 @@
 #!/usr/bin/env ruby
 # coding: utf-8
 # vim: shiftwidth=2:expandtab
+#
+# This program is free software. It comes without any warranty, to
+# the extent permitted by applicable law. You can redistribute it
+# and/or modify it under the terms of the Do What The Fuck You Want
+# To Public License, Version 2, as published by Sam Hocevar. See
+# http://sam.zoy.org/wtfpl/COPYING for more details. */
 
 
 module Conversion # from toyunda-tools/toyunda-lib.rb, I don't understand half of it but w/e
@@ -23,6 +29,52 @@ module Conversion # from toyunda-tools/toyunda-lib.rb, I don't understand half o
     (ToyundaImageZoom * subsize) / 30
   end
 end
+
+class String
+  def escape_shell # there must be a less stupid way to do this
+    "'" + gsub("'", "'\"'\"'") + "'"
+  end
+end
+
+class VideoProperties
+  attr_reader :fps, :w, :h
+  def initialize video
+    if File.exists? video
+      io = IO.popen %(mplayer -slave -quiet -vo null -ao null #{video.escape_shell}), "r+"
+      io.puts "get_property fps"
+      io.puts "get_video_resolution"
+      io.puts "quit"
+      while io.gets
+        $stderr.puts $_
+        if $_ =~ /^ANS_fps=\d+\.\d+/
+          @fps = $_[/\d+\.\d+/]
+        elsif $_ =~ /^ANS_VIDEO_RESOLUTION='\d+ x \d+'/
+          @w, @h = $_.scan(/(\d+) x (\d+)/)[0]
+        end
+      end
+    else
+      $stderr.puts "FILE NOT FOUND: #{video}"
+      exit 1
+    end
+    
+    if @fps
+      @fps = @fps.to_f
+    else
+      $stderr.puts "WARNING: Framerate not found, set to 25fps for file #{video}"
+      @fps = 25.0
+    end
+
+    if @w and @h
+      @w = @w.to_f
+      @h = @h.to_f
+    else
+      $stderr.puts "WARNING: Resolution not found, set to 800x600 for file #{video}"
+      @w = 800
+      @h = 600
+    end
+  end
+end
+
 
 class ToyundaToAss
 
@@ -181,15 +233,26 @@ END
 end
 
 if $PROGRAM_NAME == __FILE__
-  if ARGV.length != 4
-    $stderr.puts "Usage : #{$0} <toyunda file> <framerate> <x resolution> <y resolution> > <ass file>"
+  if ARGV.length != 2 && ARGV.length != 4
+    $stderr.puts <<END
+Usage : 
+    #{$PROGRAM_NAME} <toyunda file> <framerate> <x resolution> <y resolution> > <ass file>
+    #{$PROGRAM_NAME} <toyunda file> <video file> > <ass file>
+END
     exit
   end
 
   filename = ARGV[0]
-  fps = ARGV[1].to_f
-  w = ARGV[2].to_i
-  h = ARGV[3].to_i
+  if ARGV.length == 2
+    p = VideoProperties.new ARGV[1]
+    fps = p.fps
+    w = p.w
+    h = p.h
+  else
+    fps = ARGV[1].to_f
+    w = ARGV[2].to_i
+    h = ARGV[3].to_i
+  end
 
   ToyundaToAss::convert_file(filename, fps, w, h, $stdout)
 end
