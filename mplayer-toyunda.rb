@@ -7,6 +7,8 @@ class String
   end
 end
 
+$stderr.puts "THIS FILE IS OUT OF DATE, I doubt it does anything useful but you can always try."
+
 ARGV.each{|arg|
   if File.exists?(arg) && File.exists?(txt_filename = arg.sub(/\.(avi|flv|mkv|mp4)$/, ".txt"))
     puts "TOYUNDA->ASS for file #{arg}"
