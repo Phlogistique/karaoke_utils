@@ -40,7 +40,7 @@ class VideoProperties
   attr_reader :fps, :w, :h
   def initialize video
     if File.exists? video
-      io = IO.popen %(mplayer -slave -quiet -vo null -ao null #{video.escape_shell}), "r+"
+      io = IO.popen %(mplayer -slave -quiet -vo null -ao null #{video.escape_shell}), "r+", :encoding => "BINARY"
       io.puts "get_property fps"
       io.puts "get_video_resolution"
       io.puts "quit"
