@@ -45,7 +45,6 @@ class VideoProperties
       io.puts "get_video_resolution"
       io.puts "quit"
       while io.gets
-        $stderr.puts $_
         if $_ =~ /^ANS_fps=\d+\.\d+/
           @fps = $_[/\d+\.\d+/]
         elsif $_ =~ /^ANS_VIDEO_RESOLUTION='\d+ x \d+'/
