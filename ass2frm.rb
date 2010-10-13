@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require File.dirname(__FILE__) + "/utils.rb"
+
 if ARGV.length != 2
   $stderr.puts "Usage : #{$0} <name.ass> <frames per second OR video file>"
   $stderr.puts "The video file is used only to retrieve the number of frames per second."
@@ -15,10 +17,6 @@ $regex_delay = /^\{\\kf?(\d+)\}(?=\{)/
 $regex_syllabe = /\{\\k(f?)(\d+)\}([^\{]+)/
 
 class String
-  def escape_shell # there must be a less stupid way to do this
-    "'" + gsub("'", "'\"'\"'") + "'"
-  end
-
 
   def color_ass_to_toyunda
     # FIXME: This is prolly all kind of wrong because the spec is retarded

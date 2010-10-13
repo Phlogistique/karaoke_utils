@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby1.8
-# lol I spent like two hours trying to write a makefile to do this but I forgot
-# about spaces in filename so fuck GNU make
+# show which videos have no subs and which subs have no video in pwd
 
-class String; def basename; sub /\..*?$/, ''; end; def escape_shell; "'" + gsub("'", "'\"'\"'") + "'"; end; end
-class Array; def basename; map{|i|i.basename}; end; end
+require File.dirname(__FILE__) + "/utils.rb"
 
 avi = Dir["*.avi"]
 txt = Dir["*.txt"]
