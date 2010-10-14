@@ -1,7 +1,7 @@
 
 class String
   def basename
-    sub /\..*?$/, ''
+    sub /\.[^\.]*$/, ''
   end
 
   def escape_shell

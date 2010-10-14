@@ -7,8 +7,8 @@ require File.dirname(__FILE__) + "/utils.rb"
 $toyunda2ass ||= ENV["TOYUNDA2ASS"]
 $toyunda2ass ||= File.dirname(__FILE__) + "/../mplayer-toyunda-lol/toyunda2ass.rb"
 
-avi = Dir["*.avi"]
-txt = Dir["*.txt"]
+avi = Dir["**/*.avi"]
+txt = Dir["**/*.txt"]
 
 basenames = avi.basename & txt.basename
 basenames.each do |name|
