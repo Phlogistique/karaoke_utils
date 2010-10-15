@@ -8,6 +8,7 @@
 # To Public License, Version 2, as published by Sam Hocevar. See
 # http://sam.zoy.org/wtfpl/COPYING for more details.
 
+require File.dirname(__FILE__) + '/video_properties.rb'
 
 module Conversion # from toyunda-tools/toyunda-lib.rb, I don't understand half of it but w/e
   private # y'a des constantes qui servent à rien la-dedans, non ?
@@ -30,51 +31,6 @@ module Conversion # from toyunda-tools/toyunda-lib.rb, I don't understand half o
   end
 end
 
-class String
-  def escape_shell # there must be a less stupid way to do this
-    "'" + gsub("'", "'\"'\"'") + "'"
-  end
-end
-
-class VideoProperties
-  attr_reader :fps, :w, :h
-  def initialize video
-    if File.exists? video
-      io = IO.popen %(mplayer -slave -quiet -vo null -ao null #{video.escape_shell}), "r+", :encoding => "BINARY"
-      io.puts "get_property fps"
-      io.puts "get_video_resolution"
-      io.puts "quit"
-      while io.gets
-        if $_ =~ /^ANS_fps=\d+\.\d+/
-          @fps = $_[/\d+\.\d+/]
-        elsif $_ =~ /^ANS_VIDEO_RESOLUTION='\d+ x \d+'/
-          @w, @h = $_.scan(/(\d+) x (\d+)/)[0]
-        end
-      end
-    else
-      $stderr.puts "FILE NOT FOUND: #{video}"
-      exit 1
-    end
-    
-    if @fps
-      @fps = @fps.to_f
-    else
-      $stderr.puts "WARNING: Framerate not found, set to 25fps for file #{video}"
-      @fps = 25.0
-    end
-
-    if @w and @h
-      @w = @w.to_f
-      @h = @h.to_f
-    else
-      $stderr.puts "WARNING: Resolution not found, set to 800x600 for file #{video}"
-      @w = 800
-      @h = 600
-    end
-  end
-end
-
-
 class ToyundaToAss
 
   def self.convert_file filename, fps, w, h, out
@@ -88,7 +44,7 @@ class ToyundaToAss
 
   Rx_line = /^\{(\d+)\}\{(\d+)\}(.+)/ # begin, end, text
   Rx_option = /\{(c|s|o):([^:}]+)(?::([^}]+))?\}/ # letter, begin_value, end_value # end_value is nil if there is no transition
-  Rx_color = /\$?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i # a, r, g, b
+  Rx_color = /\$?([0-9a-f]{2})?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i # a, r, g, b
   Rx_position = /(\d+),(\d+)/ # x, y
 
   attr_accessor :out
@@ -196,6 +152,7 @@ END
 
   def color_toyunda_to_ass color
     a,r,g,b = color.scan(Rx_color)[0]
+    a ||= "FF"
     a = (0xFF - a.to_i(16)).to_s(16)
     "\\c&H#{r+g+b}&\\alpha&H#{a}&" 
   end
