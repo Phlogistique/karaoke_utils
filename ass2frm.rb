@@ -13,8 +13,8 @@ end
 $regex_line = /^Dialogue: ?.*?, ?(.*?), ?(.*?), ?(.*?), ?.*?, ?.*?, ?.*?, ?.*?, ?.*?,(.*)/
 $regex_style = /^Style: ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*)/
 $regex_time = /^(\d+):(\d+):(\d+(?:\.\d+)?)$/
-$regex_delay = /^\{\\kf?(\d+)\}(?=\{)/
-$regex_syllabe = /\{\\k(f?)(\d+)\}([^\{]+)/
+$regex_delay = /^\{\\(?:k|K|kf)(\d+)\}(?=\{)/
+$regex_syllabe = /\{\\(k|K|kf)(\d+)\}([^\{]+)/
 
 class String
 
@@ -114,8 +114,8 @@ dialogues.each do |line|
 
   syllabes = lyrics.scan($regex_syllabe)
 
-  if continuous != (continuous = !!syllabes.find { |s| s[0] == "f" }) # when the style changes
-    file_lyr.puts "%style " + (continuous ? "continuous" : "default")
+  if continuous != (continuous = !!syllabes.find { |s| s[0] == "kf" || s[0] == "K" }) # when the style changes
+    file_lyr.puts "%style " + (continuous ? "continuous" : "progressive")
   end
 
   now = start_time * fps
