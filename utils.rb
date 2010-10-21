@@ -1,6 +1,6 @@
 
 class String
-  def basename
+  def cut_ext
     sub /\.[^\.]*$/, ''
   end
 
@@ -10,7 +10,7 @@ class String
 end
 
 class Array
-  def basename
-    map{|i|i.basename}
+  def cut_exts
+    map{|i|i.cut_ext}
   end
 end

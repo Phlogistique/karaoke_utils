@@ -10,7 +10,7 @@ $toyunda2ass ||= File.dirname(__FILE__) + "/../mplayer-toyunda-lol/toyunda2ass.r
 avi = Dir["**/*.avi"]
 txt = Dir["**/*.txt"]
 
-basenames = avi.basename & txt.basename
+basenames = avi.cut_exts & txt.cut_exts
 basenames.each do |name|
   ass = name + ".ass"
   avi = name + ".avi"
