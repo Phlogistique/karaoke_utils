@@ -2,6 +2,7 @@
 # lol I spent like two hours trying to write a makefile to do this but I forgot
 # about spaces in filenames so fuck GNU make
 
+require 'shellwords'
 require File.dirname(__FILE__) + "/utils.rb"
 
 $toyunda2ass ||= ENV["TOYUNDA2ASS"]
@@ -17,7 +18,7 @@ basenames.each do |name|
   txt = name + ".txt"
   next if File.exist? ass and File.ctime(ass) > File.ctime(txt) and File.ctime(ass) > File.ctime(avi)
   
-  command = "ruby1.9 #{$toyunda2ass} #{txt.escape_shell} #{avi.escape_shell} > #{ass.escape_shell}"
+  command = "ruby1.9 #{$toyunda2ass} #{txt.shellescape} #{avi.shellescape} > #{ass.shellescape}"
   puts command
   unless system command
     puts "FAILED conversion for file #{name}"

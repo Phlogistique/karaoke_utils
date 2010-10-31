@@ -3,10 +3,6 @@ class String
   def cut_ext
     sub /\.[^\.]*$/, ''
   end
-
-  def escape_shell
-    "'" + gsub("'", "'\"'\"'") + "'"
-  end
 end
 
 class Array

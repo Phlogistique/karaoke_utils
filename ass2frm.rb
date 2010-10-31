@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'shellwords'
 require File.dirname(__FILE__) + "/utils.rb"
 
 if ARGV.length != 2
@@ -34,7 +35,7 @@ def get_fps(file)
     return nil
   end
 
-  io = IO.popen %(mplayer -slave -quiet -vo null -ao null #{file.escape_shell}), "r+"
+  io = IO.popen %(mplayer -slave -quiet -vo null -ao null #{file.shellescape}), "r+"
   io.puts "get_property fps"
   io.puts "quit"
   while io.gets
