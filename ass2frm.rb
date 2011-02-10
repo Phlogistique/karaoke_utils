@@ -7,7 +7,6 @@ if ARGV.length != 2
   $stderr.puts "Usage : #{$0} <name.ass> <frames per second OR video file>"
   $stderr.puts "The video file is used only to retrieve the number of frames per second."
   $stderr.puts "The scripts create an .frm and a .lyr file in the same directory as the ASS file."
-  $stderr.puts "Some defaults styling attributes are added in the .lyr file, make sure to edit it to put your own. The style is NOT (yet) retrieved from the ASS file."
   exit 1
 end
 
@@ -15,7 +14,7 @@ $regex_line = /^Dialogue: ?.*?, ?(.*?), ?(.*?), ?(.*?), ?.*?, ?.*?, ?.*?, ?.*?, 
 $regex_style = /^Style: ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*?), ?(.*)/
 $regex_time = /^(\d+):(\d+):(\d+(?:\.\d+)?)$/
 $regex_delay = /^\{\\(?:k|K|kf)(\d+)\}(?=\{)/
-$regex_syllabe = /\{\\(k|K|kf)(\d+)\}([^\{]+)/
+$regex_syllabe = /\{\\(k|K|kf)(\d+)\}([^\{]*)/
 
 class String
 
@@ -121,8 +120,12 @@ dialogues.each do |line|
 
   now = start_time * fps
   syllabes.each { |s|
-      file_frm.puts "#{now.round} #{(now += s[1].to_i * fps / 100).round}"
+    after = now + (s[1].to_i * fps / 100)
+    unless s[2].empty?
+      file_frm.puts "#{now.round} #{after.round}"
       file_lyr.print "&" + s[2]
+    end
+    now = after
   }
   file_lyr.puts
 end

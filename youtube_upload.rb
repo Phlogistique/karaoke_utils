@@ -41,11 +41,12 @@ if added
   exit
 end
 
-password = (print "Password: "; gets.chomp.shellescape)
+email = (ARGV[0] or (print "Email: "; gets.chomp.shellescape))
+password = (ARGV[1] or (print "Password: "; gets.chomp.shellescape))
 vids.each do |video|
   next if video["uploaded"]
   next unless video["upload"]
-  command = "youtube-upload imisintyou@gmail.com #{password} "
+  command = "youtube-upload #{email} #{password} "
   command << video["file"].shellescape << " " << video["title"].shellescape << "' (karaoke)' "
   command << video["description"].shellescape << " Music 'karaoke, anime'"
 
