@@ -1,0 +1,129 @@
+#!/usr/bin/env ruby1.9.1
+# coding: utf-8
+
+require "cgi"
+require "stringio"
+require File.dirname(__FILE__) + "/web"
+
+require "/home/no/up/code/mplayer-toyunda-lol/toyunda2ass.rb"
+$ass2frm = "/home/no/up/code/karaoke_utils/ass2frm.rb"
+$toyundagen = "/home/no/generator_cont/toyunda-gen.rb"
+class KaraokeTools
+  def call_ass2frm
+    command = $ass2frm + " " + @tmp.shellfile(@name) + " " + @fps.to_s +
+      " 1>>" + @outfile +
+      " 2>>" + @outfile
+    File.open(@outfile, "a") {|f| f.puts f.puts command }
+    system command
+  end
+
+  def call_toyundagen
+    command = $toyundagen + 
+      " " + @tmp.shellfile(@stem + ".lyr") +
+      " " + @tmp.shellfile(@stem + ".frm") +
+      " 1>" + @tmp.shellfile(@stem + ".txt") +
+      " 2>>" + @outfile
+    File.open(@outfile, "a") {|f| f.puts "\n\n" + command }
+    system command
+  end
+
+  def ass_to_toyunda
+    if call_ass2frm and call_toyundagen
+      send_zip_of_tmp_dir
+    else
+      @cgi.out { File.read @outfile }
+    end
+  end
+
+  def ass_to_toyunda_gen
+    if call_ass2frm
+      send_zip_of_tmp_dir
+    else
+      @cgi.out { File.read @outfile }
+    end
+    @tmp.rm
+  end
+
+  def toyunda_to_ass
+    ass = StringIO.new
+    begin
+      ToyundaToAss::convert_file(@tmp.file(@name), @fps, 800, 600, ass)
+      @cgi.out("type"                => "text/ass",
+               "Content-Disposition" => "attachment; filename=\"#{
+                                        @stem}.ass\""
+      ) { ass.string }
+
+    rescue => e
+      @cgi.out{
+        @cgi.pre{
+          "Couldn't convert your file:\n\n" +
+          e.message + "\n" +
+          e.backtrace.join("\n")
+        }
+      }
+    end
+  end
+
+  def send_zip_of_tmp_dir
+      @cgi.out("type"                => "application/zip",
+               "Content-Disposition" => "attachment; filename=\"#{
+                                        @stem}.zip\""
+      ) {
+        command = "zip -rj - #{@tmp.dir}"
+        $stderr << command << "\n"
+        %x(#{command})
+      }
+  end
+
+  def handle_and_convert
+    @tmp = TmpDir.new
+
+    file = @cgi["file"]
+    conversion = @cgi["conversion"]
+    fps = @cgi["fps"]
+
+    # check file/filename sanity
+
+    return [false, "No file given!"] if not file
+    @name = File.basename( file.original_filename ).gsub(/[\/\0]/,'').strip
+    return [false, "File name empty."] if @name == ""
+    @stem = @name.gsub(/\.[^\.]+$/,'')
+    contents = file.read.strip
+    return [false, "Empty file given? #{file.original_filename}"] if contents == ""
+
+    # check conversion and fps sanity
+    @fps = fps.read.to_f
+    return [false, "Invalid FPS given."] if @fps <= 0
+
+    conversion = conversion.read
+    File.open(@tmp.file(@name), "w") {|f| f.print contents }
+
+    @outfile = @tmp.file "conversion.log"
+    case conversion
+    when "asstoyundagen"
+      ass_to_toyunda_gen
+    when "asstoyunda"
+      ass_to_toyunda
+    when "toyundaass"
+      toyunda_to_ass
+    else
+      tmp.rm
+      return [false, "Invalid operation."]
+    end
+  end
+  
+  def initialize
+    @cgi = CGI.new("html4")
+    success, result = handle_and_convert
+#    if success
+#      @cgi.out("Content-Disposition: attachment; " +
+#              "filename=" +
+#              File.basename(@cgi["file"].original_filename.gsub(/\r\n\0/, ""))) do
+#      end
+#    else
+      @cgi.out{result}
+#    end
+  end
+end
+
+KaraokeTools.new

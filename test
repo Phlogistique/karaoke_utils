@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby1.9.1
+# coding: utf-8
+
+require "cgi"
+require "stringio"
+
+def prompt_form(cgi)
+  cgi.out("charset" => "utf-8") do
+    cgi.html {
+      cgi.head { cgi.title { "Karaoke conversion tools" } } +
+      cgi.body { 
+        cgi.multipart_form("process") {
+          cgi.radio_group("conversion",
+                          ["asstoyundagen", "ASS => toyunda-gen (upload a .ass or a .ssa with karaoke, get lyr+frm)<br>"],
+                          ["asstoyunda", "ASS => Toyunda (upload a .ass or a .ssa with karaoke, get lyr+frm+txt)<br>"],
+                          ["toyundaass", "Toyunda => ASS (upload a .txt, get an ass)<br>"]) +
+                          ["k200", "Toyunda-gen => ASS (upload a .lyr and a .frm, get an ass)<br>"]) +
+          cgi.file_field("file") + cgi.br +
+          "Framerate: " + cgi.text_field("fps") + cgi.br +
+          "Resolution (only for Toyunda=>ASS): " + cgi.text_field("w") +
+          "x" + cgi.text_field("h") + cgi.br +
+          cgi.submit
+        } +
+        cgi.p{"Side notes:"} +
+        cgi.ul{
+          cgi.li{"The generated lyr file tries to use a style similar to the original ASS file; however, that's not quite possible. Do check the file and change the colors."} + 
+          cgi.li{"If you used \\K or \\kf karaokes in your ASS, the continuous cursor will be emulated in Toyunda. If you want to run toyunda-gen again, you will need my <a href=\"http://neetwork.net/up/code/karaoke_utils/continuous.rb\">continuous.rb</a> plugin for toyunda-gen."} +
+          cgi.li{"The generated ASS for Toyunda=>ASS conversion will be very heavy, because it imitates the Toyunda way of doing karaokes. It does _not_ use \\k or \\kf-style karaokes, and therefore you can not convert it back to Toyunda. It aims to imitate the Toyunda as perfectly as possible. Nevertheless, it's not identical to the Toyunda output because of the following differences:" +
+            cgi.ul{
+              cgi.li{"The font size is not exactly the same (should have been fixed ten months ago but I'm too lazy)"} +
+              cgi.li{"The Epitanime logo is replaced by a red ball, rendered in real-time with the vectorial-drawing feature of ASS (lol)"} +
+              cgi.li{"The o command (absolute positionning) is buggy"} +
+              cgi.li{"The DDR and image change features are unsupported"}
+            } +
+            "Generally speaking, if your time is not one of those monster times made to exhibit the features of the Toyunda, it will run just fine."
+          } +
+          cgi.li{"The resolution is needed only for Toyunda=>ASS; only the aspect ratio matters."} +
+          cgi.li{"You can get the tools I wrote for performing these conversions in <a href=\"http://neetwork.net/up/code/karaoke_utils/\">karaoke_utils</a> and <a href=\"http://neetwork.net/up/code/mplayer-toyunda-lol/\">mplayer-toyunda-lol</a>. They are written in Ruby 1.8 or 1.9 (depends on the file). Don't hesitate to ask me about how to use them."}
+        }
+      }
+    }
+  end
+end
+
+cgi = CGI.new("html4")
+prompt_form(cgi)
+
