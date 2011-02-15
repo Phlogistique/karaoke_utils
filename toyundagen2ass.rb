@@ -7,7 +7,7 @@ class Gen2ASS
 
   StyleLine = /^%/
   GenSyllab = /&([^&\r\n]+)/
-  FrmSyllab = /(\d+)\s+(\d+)/
+  FrmSyllab = /^(?:==)?\s*(\d+)\s+(\d+)\s*$/
   Header = <<END
 [Script Info]
 Title: karaoke
@@ -90,19 +90,24 @@ END
   end
 
   def nextLine
-    line = @lyr.gets
-    if not line
-      @@err << "End of lyr file at line #{@lyr.lineno}; exiting\n"
-      return nil
-    end
+    while true
+      line = @lyr.gets
+      if not line
+        @@err << "End of lyr file at line #{@lyr.lineno}; exiting\n"
+        return nil
+      end
 
-    syls = line.scan(GenSyllab)
-    if syls.empty?
-      @@err << "No valid syllabs in this line: \"#{line.chomp}\"\n"
-      return nextLine
-    end
+      next if not (line =~ /^(&|--)/)
 
-    syls.flatten
+      syls = line.scan(GenSyllab)
+
+      if syls.empty?
+        @@err << "No valid syllabs in this line: \"#{line.chomp}\"\n"
+        next
+      end
+
+      return syls.flatten
+    end
   end
 
   # returns [begin, end] for the next syllab as integers
@@ -115,13 +120,10 @@ END
       end
 
       times = line.scan(FrmSyllab)[0]
-      if not times
-        @@err << "Invalid line in frm: \"#{line.chomp}\"\n"
-        retry
-      end
-      break
+      next if not times
+
+      return times.map{|i| i.to_i}
     end
-    times.map{|i| i.to_i}
   end
 end
 
