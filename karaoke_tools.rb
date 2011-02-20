@@ -181,10 +181,10 @@ class KaraokeTools < Ramaze::Controller
     lyr = File.open(lyr_path)
     frm = File.open(frm_path)
     ass = File.open(ass_path, 'w')
-    Gen2ASS.stderr = File.open(log_path, 'a')
+    log = File.open(log_path, 'a')
+    Gen2ASS.stderr = log
     begin
       Gen2ASS.new(lyr, frm, fps, ass)
-      ass.close
       return true
     rescue Exception => e
       flash[:message] = '<pre>' +
@@ -192,6 +192,8 @@ class KaraokeTools < Ramaze::Controller
           e.message + "\n" +
           e.backtrace.join("\n") + '</pre>'
       return false
+    ensure
+      [log, ass, lyr, frm].each{|f| f.close}
     end
   end
 
