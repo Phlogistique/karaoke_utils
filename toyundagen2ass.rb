@@ -26,14 +26,17 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 END
 
   @@err = $stderr
+  def self.stderr= err
+    @err = err
+  end
+
   def seconds_to_time n
-    line = ""
-    line << (n.to_i / 3600).to_s 
-    line << ":"
-    line << ((n.to_i % 3600) / 60).to_s
-    line << ":"
-    line << sprintf("%.2f", (n % 60))
-    line
+    "" <<
+      (n.to_i / 3600).to_s << 
+      ":" << 
+      ((n.to_i % 3600) / 60).to_s <<
+      ":" <<
+      sprintf("%.2f", (n % 60))
   end
 
   def initialize lyr, frm, fps, out
@@ -56,8 +59,7 @@ END
         sylStart, sylStop = nextSyllabeFrm
 
         unless sylStart and sylStop
-          @@err << "Not enough timed syllabs???"
-          return nil
+          raise "Not enough timed syllabs?"
         end
 
         lineStart ||= sylStart
@@ -83,7 +85,7 @@ END
     name = ""
     marginl = marginr = marginv = "0000"
     effect = ""
-    text = syls.map{|i| "{\\k#{(i[1]/@fps*100).round}}#{i[0]}"}.join
+    text = '{\k100}' + syls.map{|i| "{\\k#{(i[1]/@fps*100).round}}#{i[0]}"}.join
 
     type + ": " + [layer, start, stop, style, name, marginl, marginr, marginv,
       effect, text].join(',') + "\n"
