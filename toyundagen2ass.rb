@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# coding: utf8
+# coding: utf-8
 
 require File.dirname(__FILE__) + '/video_properties.rb'
 
