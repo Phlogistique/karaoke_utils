@@ -4,9 +4,9 @@ require 'shellwords'
 require File.dirname(__FILE__) + "/tmpdir"
 
 $karaoke_utils = File.expand_path "../karaoke_utils", File.dirname(__FILE__)
-$gen2ass= File.expand_path "toyundagen2ass.rb", $karaokeutils
-$ass2frm = File.expand_path "ass2frm.rb", $karaokeutils
-$toyundagen = File.expand_path "toyunda-gen.rb", $karaokeutils
+$gen2ass= File.expand_path "toyundagen2ass.rb", $karaoke_utils
+$ass2frm = File.expand_path "ass2frm.rb", $karaoke_utils
+$toyundagen = File.expand_path "toyunda-gen.rb", $karaoke_utils
 require $gen2ass
 
 Encoding::default_external="BINARY" if RUBY_VERSION > "1.9"
