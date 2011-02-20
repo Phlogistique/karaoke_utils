@@ -3,9 +3,10 @@ require 'ramaze'
 require 'shellwords'
 require File.dirname(__FILE__) + "/tmpdir"
 
-$gen2ass= "/home/no/prog/timing/karaoke_utils/toyundagen2ass.rb"
-$ass2frm = "/home/no/prog/timing/karaoke_utils/ass2frm.rb"
-$toyundagen = "/home/no/prog/timing/generator_cont/toyunda-gen.rb"
+$karaoke_utils = File.expand_path "../karaoke_utils", File.dirname(__FILE__)
+$gen2ass= File.expand_path "toyundagen2ass.rb", $karaokeutils
+$ass2frm = File.expand_path "ass2frm.rb", $karaokeutils
+$toyundagen = File.expand_path "toyunda-gen.rb", $karaokeutils
 require $gen2ass
 
 Encoding::default_external="BINARY" if RUBY_VERSION > "1.9"
@@ -21,6 +22,7 @@ class KaraokeTools < Ramaze::Controller
           <ul>
             <li><a href="ass_toyunda_form">ASS => Toyunda-gen</a></li>
             <li><a href="toyundagen_ass_form">Toyunda-gen => ASS</a></li>
+            <li><a href="cut_kana">Lyrics -> .lyr for toyunda-gen</a></li>
           </ul>
           <p>
             You can get the tools I wrote for performing these conversions in
@@ -75,6 +77,41 @@ class KaraokeTools < Ramaze::Controller
         </body>
       </html>
     END
+  end
+  def cut_kana
+    if request.post?
+      text = request[:file] ? request[:file][:tempfile].read : request[:lyrics]
+      @split = split_kana(text, request[:separator])
+      if request[:output_type] == "lyr"
+        name = (request[:file] ? stem(request[:file][:filename]) : "lyrics") + ".lyr"
+        send_file(response, "text/plain", name, @split)
+      end
+    end
+
+    %q(
+      <html>
+        <head>
+          <title>.lyr generator</title>
+        </head>
+        <body>
+          <?r if flash[:message] ?> <p><strong>#{flash[:message]}</strong></p> <?r end ?>
+          <h1>.lyr generator</h1>
+          <form method="post" action="cut_kana" enctype="multipart/form-data">
+            <input type="radio" name="output_type" value="lyr" checked>Download a .lyr file<br>
+            <input type="radio" name="output_type" value="inline">Just see the result<br>
+            Text file with lyrics: <input type="file" name="file" size="20"><br>
+            Lyrics: <br><textarea name="lyrics"></textarea><br>
+            Separator: <input type="text" name="separator" size="2" value="&"><br>
+            <!-- <input type="radio" name="where" value="before" checked>&be&fore
+            <input type="radio" name="where" value="after">af&ter&
+            <input type="radio" name="where" value="between">be&tween -->
+            <input type="submit">
+          </form>
+          <p>Fill only one of "Text file with lyrics" and "Lyrics".</p>
+          <?r if @split ?><pre>#{@split}</pre><?r end ?>
+        </body>
+      </html>
+    )
   end
 
   def ass_to_toyunda
@@ -225,6 +262,18 @@ class KaraokeTools < Ramaze::Controller
     response['Content-Disposition'] = %(attachment; filename="#{name}")
     respond contents
   end
+
+  $kana = /(?:[kstnhmrwngzdbpjf]|ch|sh|ts)?y?[aeiuo]|[kstngzdbp]/
+
+  def split_kana(line, separator = "|")
+    division = /(#{$kana}|\w+)|(\W+)/
+    line.scan(division).map{|i| i[0] ? separator + i[0] : i[1] }.join
+  end
+  
+  def stem name
+    File.basename(name).sub(/\.[^\.]+$/, "")
+  end
+
 end
 
 Ramaze.start
