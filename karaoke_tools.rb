@@ -80,8 +80,8 @@ class KaraokeTools < Ramaze::Controller
   end
   def cut_kana
     if request.post?
-      text = request[:file] ? request[:file][:tempfile].read : request[:lyrics]
-      @split = split_kana(text, request[:separator])
+      @text = request[:file] ? request[:file][:tempfile].read : request[:lyrics]
+      @split = split_kana(@text, request[:separator], request[:casesensitive], request[:timelong])
       if request[:output_type] == "lyr"
         name = (request[:file] ? stem(request[:file][:filename]) : "lyrics") + ".lyr"
         send_file(response, "text/plain", name, @split)
@@ -100,11 +100,13 @@ class KaraokeTools < Ramaze::Controller
             <input type="radio" name="output_type" value="lyr" checked>Download a .lyr file<br>
             <input type="radio" name="output_type" value="inline">Just see the result<br>
             Text file with lyrics: <input type="file" name="file" size="20"><br>
-            Lyrics: <br><textarea name="lyrics"></textarea><br>
+            Lyrics: <br><textarea name="lyrics"><?r if @text ?>#{@text}<?r end ?></textarea><br>
             Separator: <input type="text" name="separator" size="2" value="&"><br>
             <!-- <input type="radio" name="where" value="before" checked>&be&fore
             <input type="radio" name="where" value="after">af&ter&
-            <input type="radio" name="where" value="between">be&tween -->
+            <input type="radio" name="where" value="between">be&tween <br> -->
+            <input type="checkbox" name="casesensitive" value="casesensitive" checked>Don't touch uppercase words<br>
+            <input type="checkbox" name="timelong" value="timelong" checked>Time long vowels and double consonnants as two syllabs<br>
             <input type="submit">
           </form>
           <p>Fill only one of "Text file with lyrics" and "Lyrics".</p>
@@ -263,10 +265,15 @@ class KaraokeTools < Ramaze::Controller
     respond contents
   end
 
-  $kana = /(?:[kstnhmrwngzdbpjf]|ch|sh|ts)?y?[aeiuo]|[kstngzdbp]/
+  $kana = /(?:[kstnhmrwngzdbpjf]|ch|sh|ts)?y?[aeiuo]|[kstngzdbpc]/
+  $kanai = /(?:[kstnhmrwngzdbpjf]|ch|sh|ts)?y?[aeiuo]|[kstngzdbpc]/i
+  $kanal = /(?:[kstnhmrwngzdbpjf]|ch|sh|ts)*y?[aeiuo]+n?/
+  $kanali = /(?:[kstnhmrwngzdbpjf]|ch|sh|ts)*y?[aeiuo]+n?/i
 
-  def split_kana(line, separator = "|")
-    division = /(#{$kana}|\w+)|(\W+)/
+  def split_kana(line, separator = "|", case_sensitive = true, time_long_as_two = true)
+    exp = time_long_as_two ? (case_sensitive ? $kana : $kanai) :
+                             (case_sensitive ? $kanal : $kanali)
+    division = /(#{exp}|\w+)|(\W+)/
     line.scan(division).map{|i| i[0] ? separator + i[0] : i[1] }.join
   end
   
