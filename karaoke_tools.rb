@@ -283,4 +283,4 @@ class KaraokeTools < Ramaze::Controller
 
 end
 
-Ramaze.start :adapter => :mongrel, :port => 7001
+Ramaze.start
