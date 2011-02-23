@@ -100,8 +100,8 @@ class KaraokeTools < Ramaze::Controller
             <input type="radio" name="output_type" value="lyr" checked>Download a .lyr file<br>
             <input type="radio" name="output_type" value="inline">Just see the result<br>
             Text file with lyrics: <input type="file" name="file" size="20"><br>
-            Lyrics: <br><textarea name="lyrics"><?r if @text ?>#{@text}<?r end ?></textarea><br>
-            Separator: <input type="text" name="separator" size="2" value="&"><br>
+            Lyrics: <br><textarea name="lyrics"><?r if @text ?>#{html_escape @text}<?r end ?></textarea><br>
+            Separator: <input type="text" name="separator" size="2" value="&amp;"><br>
             <!-- <input type="radio" name="where" value="before" checked>&be&fore
             <input type="radio" name="where" value="after">af&ter&
             <input type="radio" name="where" value="between">be&tween <br> -->
@@ -110,7 +110,7 @@ class KaraokeTools < Ramaze::Controller
             <input type="submit">
           </form>
           <p>Fill only one of "Text file with lyrics" and "Lyrics".</p>
-          <?r if @split ?><pre>#{@split}</pre><?r end ?>
+          <?r if @split ?><pre>#{html_escape @split}</pre><?r end ?>
         </body>
       </html>
     )
@@ -283,4 +283,4 @@ class KaraokeTools < Ramaze::Controller
 
 end
 
-Ramaze.start
+Ramaze.start :adapter => :mongrel, :port => 7001
