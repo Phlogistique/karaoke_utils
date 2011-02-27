@@ -71,6 +71,8 @@ class KaraokeTools < Ramaze::Controller
             .lyr file: <input type="file" name="lyr" size="20"><br>
             .frm file: <input type="file" name="frm" size="20"> (optional)<br>
             Framerate: <input type="text" name="fps" size="10"><br>
+            <input type="radio" name="karaoke_type" value="kf" checked>\\\\kf (continuous)<br>
+            <input type="radio" name="karaoke_type" value="k">\\\\k (discrete)<br><br>
             <input type="submit">
           </form>
           <p>You can use a .txt output by toyunda-gen for the .lyr field. If you do, you can leave the .frm field empty.</p>
@@ -181,12 +183,12 @@ class KaraokeTools < Ramaze::Controller
       redirect r(:ass_toyunda_form)
     end
 
-
     fps = request[:fps].to_f
     if fps <= 0
       flash[:message] = "Invalid framerate given; please input a positive number."
       redirect r(:toyundagen_ass_form)
     end
+
 
     lyr_tempfile, lyr_filename = request[:lyr].values_at(:tempfile, :filename)
     lyr_basename = File.basename lyr_filename
@@ -207,7 +209,7 @@ class KaraokeTools < Ramaze::Controller
     ass_path = dir.file(stem + ".ass")
     log_path = dir.file("log")
 
-    if call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path)
+    if call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path, request[:karaoke_type])
       send_file(response, "text/ass", stem + '.ass', File.read(ass_path))
     else
       redirect r(:toyundagen_ass_form)
@@ -216,11 +218,12 @@ class KaraokeTools < Ramaze::Controller
 
   private
 
-  def call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path)
+  def call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path, karaoke_type = "kf")
     lyr = File.open(lyr_path)
     frm = File.open(frm_path)
     ass = File.open(ass_path, 'w')
     log = File.open(log_path, 'a')
+    Gen2ASS.karaoke_type = karaoke_type
     Gen2ASS.stderr = log
     begin
       Gen2ASS.new(lyr, frm, fps, ass)
