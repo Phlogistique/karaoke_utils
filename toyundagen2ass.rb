@@ -12,13 +12,13 @@ class Gen2ASS
 [Script Info]
 Title: karaoke
 ScriptType: v4.00+
-WrapStyle: 2
+WrapStyle: 0
 ScaledBorderAndShadow: yes
 Collisions: Normal
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,DejaVu Sans Mono,30,&H00FFFFFF,&H0000FEEF,&H00000000,&H00666666,-1,0,0,0,100,100,0,0,1,0,1,8,10,10,10,1
+Style: Default,Arial,20,&H00FFFFFF,&H000088EF,&H00000000,&H00666666,-1,0,0,0,100,100,0,0,1,3,0,8,10,10,10,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -26,8 +26,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 END
 
   @@err = $stderr
+  @@kf = "kf"
   def self.stderr= err
     @err = err
+  end
+  def self.karaoke_type= kf
+    @@kf = kf
   end
 
   def seconds_to_time n
@@ -79,13 +83,13 @@ END
   def formatLine start, stop, syls
     type = "Dialogue"
     layer = 1
-    start = seconds_to_time(start / @fps)
+    start = seconds_to_time(start / @fps - 1)
     stop = seconds_to_time(stop / @fps)
     style = "Default"
     name = ""
     marginl = marginr = marginv = "0000"
     effect = ""
-    text = '{\k100}' + syls.map{|i| "{\\k#{(i[1]/@fps*100).round}}#{i[0]}"}.join
+    text = '{\k100}' + syls.map{|i| "{\\#{@@kf}#{(i[1]/@fps*100).round}}#{i[0]}"}.join
 
     type + ": " + [layer, start, stop, style, name, marginl, marginr, marginv,
       effect, text].join(',') + "\n"
