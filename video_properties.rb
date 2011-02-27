@@ -51,4 +51,3 @@ end
 
 puts VideoProperties.new(ARGV[0]).fps_s if $PROGRAM_NAME == __FILE__
 
-
