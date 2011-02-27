@@ -35,6 +35,7 @@ END
   end
 
   def seconds_to_time n
+    n = 0 if n < 0
     "" <<
       (n.to_i / 3600).to_s << 
       ":" << 
