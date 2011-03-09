@@ -35,7 +35,6 @@ END
   end
 
   def seconds_to_time n
-    n = 0 if n < 0
     "" <<
       (n.to_i / 3600).to_s << 
       ":" << 
@@ -82,15 +81,23 @@ END
   end
 
   def formatLine start, stop, syls
+
+    start_delay = 100
+    start = start / @fps - 1
+    if start < 0
+      start_delay += start * 100
+      start = 0
+    end
+
     type = "Dialogue"
     layer = 1
-    start = seconds_to_time(start / @fps - 1)
+    start = seconds_to_time(start)
     stop = seconds_to_time(stop / @fps)
     style = "Default"
     name = ""
     marginl = marginr = marginv = "0000"
     effect = ""
-    text = '{\k100}' + syls.map{|i| "{\\#{@@kf}#{(i[1]/@fps*100).round}}#{i[0]}"}.join
+    text = "{\\k#{start_delay}}" + syls.map{|i| "{\\#{@@kf}#{(i[1]/@fps*100).round}}#{i[0]}"}.join
 
     type + ": " + [layer, start, stop, style, name, marginl, marginr, marginv,
       effect, text].join(',') + "\n"
