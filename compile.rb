@@ -6,7 +6,7 @@ require 'shellwords'
 require File.dirname(__FILE__) + "/utils.rb"
 
 $toyunda2ass ||= ENV["TOYUNDA2ASS"]
-$toyunda2ass ||= File.dirname(__FILE__) + "/../mplayer-toyunda-lol/toyunda2ass.rb"
+$toyunda2ass ||= File.dirname(__FILE__) + "/mplayer-toyunda-lol/toyunda2ass.rb"
 
 avi = Dir["**/*.avi"]
 txt = Dir["**/*.txt"]

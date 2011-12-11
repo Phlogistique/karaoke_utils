@@ -8,7 +8,7 @@
 # To Public License, Version 2, as published by Sam Hocevar. See
 # http://sam.zoy.org/wtfpl/COPYING for more details.
 
-require File.dirname(__FILE__) + '/../karaoke_utils/video_properties.rb'
+require File.dirname(__FILE__) + '/../video_properties.rb'
 
 module Conversion # from toyunda-tools/toyunda-lib.rb, I don't understand half of it but w/e
   private # y'a des constantes qui servent à rien la-dedans, non ?
