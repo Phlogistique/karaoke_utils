@@ -12,7 +12,7 @@ require 'shellwords'
 require File.dirname(__FILE__) + "/utils.rb"
 
 class VideoProperties
-  attr_reader :fps, :w, :h, :fps_s
+  attr_reader :fps, :w, :h, :fps_s, :ok
   def initialize video
     if File.exists? video
       io = IO.popen %(mplayer -slave -quiet -vo null -ao null #{video.shellescape}), "r+", :encoding => "BINARY"
@@ -33,9 +33,11 @@ class VideoProperties
     
     if @fps_s
       @fps = @fps_s.to_f
+      @ok = true
     else
       $stderr.puts "WARNING: Framerate not found, set to 25fps for file #{video}"
       @fps = 25.0
+      @ok = false
     end
 
     if @w and @h
@@ -49,5 +51,9 @@ class VideoProperties
   end
 end
 
-puts VideoProperties.new(ARGV[0]).fps_s if $PROGRAM_NAME == __FILE__
+if $PROGRAM_NAME == __FILE__
+  properties = VideoProperties.new(ARGV[0])
+  puts properties.fps_s
+  exit 1 if not properties.ok
+end
 
