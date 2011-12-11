@@ -3,7 +3,8 @@ Miscelaneous karaoke utils
 
 This repo contains serveral utils that manipulate subtitle files used to
 display karaoke. Most are useless/outdated/dirty hacks, but some of them may be
-useful.
+useful. The "Toyunda" is a software suite used by French student association
+Epitanime for displaying karaokes during the events they organize.
 
 Some of them only work with Ruby 1.9, some others only work with Ruby 1.8.
 
@@ -22,6 +23,20 @@ gen2ass.rb
 
 properties.rb
         Gets the resolution and the framerate of a video file using mplayer.
+
+mplayer-toyunda-lol
+        Converts from an arbitrary Toyunda karaoke file to an ASS file; one
+        subtitle line is generated for every subtitle character, so the
+        resulting file is quite big. It worked at some point but now it
+        doesn't.
+
+        The name is because it was intended to be used as a drop-in replacement
+        from mplayer-toyunda by providing a wrapper that compiled Toyunda files
+        to ASS before launching a vanilla mplayer. The main goal was proving
+        that using ASS for the needs adressed by the Toyunda is completely
+        feasible. I think the "lol" was intended as sarcasm with regards to the
+        "not invented here" syndrome and the general arrogance of the Epitanime
+        staff in the recent years.
 
 hardsub.rb
 compile.rb
