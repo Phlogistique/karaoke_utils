@@ -34,23 +34,20 @@ mplayer-toyunda-lol/
         resulting file is quite big. It worked at some point but now it
         doesn't.
 
-        The name is because it was intended to be used as a drop-in replacement
-        from mplayer-toyunda by providing a wrapper that compiled Toyunda files
-        to ASS before launching a vanilla mplayer. The main goal was proving
-        that using ASS for the needs adressed by the Toyunda is completely
-        feasible. I think the "lol" was intended as sarcasm with regards to the
-        "not invented here" syndrome and the general arrogance of the Epitanime
-        staff in the recent years.
+        The name is because it was intended to be usable as a drop-in
+        replacement from mplayer-toyunda by providing a wrapper that compiled
+        Toyunda files to ASS before launching a vanilla mplayer. The main goal
+        was proving that using ASS for the needs adressed by the Toyunda is
+        completely feasible. I think the "lol" was intended as sarcasm with
+        regards to the "not invented here" syndrome and the general arrogance
+        of the Epitanime staff in the recent years.
 
-hardsub.rb
-compile.rb
-upload.rb
+hardsub.rb compile.rb upload.rb
         Nothing really useful.
         Those scripts are just hacky proto-makefiles I used to upload a lot of
         hardsubbed karaoke videos to Youtube. Then Youtube deleted my account.
         They depend on mplayer-toyunda-lol that for some reason doesn't work
         anymore.
 
-missing.rb
-utils.rb
+missing.rb utils.rb
         Useless, why are those even here.
