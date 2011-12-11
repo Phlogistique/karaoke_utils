@@ -24,7 +24,11 @@ gen2ass.rb
 properties.rb
         Gets the resolution and the framerate of a video file using mplayer.
 
-mplayer-toyunda-lol
+webi/
+        A quick web interface to some of these tools using the Ruby web
+        framework Ramaze. Not super secure, run at your own discretion.
+
+mplayer-toyunda-lol/
         Converts from an arbitrary Toyunda karaoke file to an ASS file; one
         subtitle line is generated for every subtitle character, so the
         resulting file is quite big. It worked at some point but now it
