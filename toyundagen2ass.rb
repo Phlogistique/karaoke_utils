@@ -8,6 +8,7 @@ class Gen2ASS
   StyleLine = /^%/
   GenSyllab = /&([^&\r\n]+)/
   FrmSyllab = /^(?:==)?\s*(\d+)\s+(\d+)\s*$/
+  BOM = "\xEF\xBB\xBF" # work around lack of \u support in 1.8
   Header = <<END
 [Script Info]
 Title: karaoke
@@ -27,11 +28,15 @@ END
 
   @@err = $stderr
   @@kf = "kf"
+  @@bom = true
   def self.stderr= err
     @err = err
   end
   def self.karaoke_type= kf
     @@kf = kf
+  end
+  def self.bom= bom
+    @@bom = bom
   end
 
   def seconds_to_time n
@@ -52,6 +57,7 @@ END
   end
 
   def parse
+    @out << BOM if @@bom
     @out << Header
     while (@syls = nextLine)
       lineStart = nil
