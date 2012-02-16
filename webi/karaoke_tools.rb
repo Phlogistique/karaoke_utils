@@ -2,8 +2,7 @@ require 'rubygems'
 require 'ramaze'
 require 'shellwords'
 
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-require "tmpdir"
+require File.dirname(__FILE__) + "/tmpdir"
 
 $karaoke_utils = File.expand_path "..", File.dirname(__FILE__)
 
@@ -78,6 +77,7 @@ class KaraokeTools < Ramaze::Controller
             <input type="radio" name="karaoke_type" value="k">\\\\k (discrete)<br>
             <input type="radio" name="karaoke_type" value="hybrid">hybrid:
             <input type="text" name="t" size="5" value="0.8"><br><br>
+            <input type="checkbox" name="bom" value="bom" checked>Include an UTF-8 <a href="http://en.wikipedia.org/wiki/Byte_order_mark">BOM</a> in the generated file<br><br>
             <input type="submit">
           </form>
           <p>You can use a .txt output by toyunda-gen for the .lyr field. If you do, you can leave the .frm field empty.</p>
@@ -220,7 +220,7 @@ class KaraokeTools < Ramaze::Controller
     ass_path = dir.file(stem + ".ass")
     log_path = dir.file("log")
 
-    if call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path, karaoke_type)
+    if call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path, karaoke_type, request[:bom])
       send_file(response, "text/ass", stem + '.ass', File.read(ass_path))
     else
       redirect r(:toyundagen_ass_form)
@@ -229,13 +229,13 @@ class KaraokeTools < Ramaze::Controller
 
   private
 
-  def call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path, karaoke_type = true)
+  def call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path, karaoke_type = true, bom = true)
     lyr = File.open(lyr_path)
     frm = File.open(frm_path)
     ass = File.open(ass_path, 'w')
     log = File.open(log_path, 'a')
     begin
-      Gen2ASS.new(lyr, frm, fps, ass, :err => log, :kf => karaoke_type)
+      Gen2ASS.new(lyr, frm, fps, :out => ass, :err => log, :kf => karaoke_type, :bom => bom)
       return true
     rescue Exception => e
       flash[:message] = '<pre>' +

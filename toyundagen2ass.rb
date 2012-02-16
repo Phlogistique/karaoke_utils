@@ -43,7 +43,7 @@ END
       sprintf("%.2f", (n % 60))
   end
 
-  def initialize lyr, frm, fps, out, opts={}
+  def initialize lyr, frm, fps, opts={}
 
     @kf, @out, @err, @bom = opts.values_at :kf, :out, :err, :bom
 
@@ -106,7 +106,7 @@ END
     name = ""
     marginl = marginr = marginv = "0000"
     effect = ""
-    text = "{\\k#{start_delay}}" + syls.map{|i| "{\\#{kf i[1]}#{(i[1]/@fps*100).round}}#{i[0]}"}.join
+    text = "{\\k#{start_delay}}" + syls.map{|i| "{\\#{kf(i[1]/@fps)}#{(i[1]/@fps*100).round}}#{i[0]}"}.join
 
     type + ": " + [layer, start, stop, style, name, marginl, marginr, marginv,
       effect, text].join(',') + "\n"
