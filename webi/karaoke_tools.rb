@@ -73,6 +73,8 @@ class KaraokeTools < Ramaze::Controller
             Framerate: <input type="text" name="fps" size="10"><br>
             <input type="radio" name="karaoke_type" value="kf" checked>\\\\kf (continuous)<br>
             <input type="radio" name="karaoke_type" value="k">\\\\k (discrete)<br><br>
+            <input type="radio" name="karaoke_type" value="hybrid">hybrid:
+            <input type="text" name="t" size="5" value="0.8"><br><br>
             <input type="submit">
           </form>
           <p>You can use a .txt output by toyunda-gen for the .lyr field. If you do, you can leave the .frm field empty.</p>
@@ -189,6 +191,12 @@ class KaraokeTools < Ramaze::Controller
       redirect r(:toyundagen_ass_form)
     end
 
+    karaoke_type =
+      case request[:karaoke_type]
+        when "k" then false
+        when "ks" then true
+        else request[:t].to_f
+      end
 
     lyr_tempfile, lyr_filename = request[:lyr].values_at(:tempfile, :filename)
     lyr_basename = File.basename lyr_filename
@@ -209,7 +217,7 @@ class KaraokeTools < Ramaze::Controller
     ass_path = dir.file(stem + ".ass")
     log_path = dir.file("log")
 
-    if call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path, request[:karaoke_type])
+    if call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path, karaoke_type)
       send_file(response, "text/ass", stem + '.ass', File.read(ass_path))
     else
       redirect r(:toyundagen_ass_form)
@@ -218,15 +226,13 @@ class KaraokeTools < Ramaze::Controller
 
   private
 
-  def call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path, karaoke_type = "kf")
+  def call_gen2ass(lyr_path, frm_path, fps, ass_path, log_path, karaoke_type = true)
     lyr = File.open(lyr_path)
     frm = File.open(frm_path)
     ass = File.open(ass_path, 'w')
     log = File.open(log_path, 'a')
-    Gen2ASS.karaoke_type = karaoke_type
-    Gen2ASS.stderr = log
     begin
-      Gen2ASS.new(lyr, frm, fps, ass)
+      Gen2ASS.new(lyr, frm, fps, ass, :err => log, :kf => karaoke_type)
       return true
     rescue Exception => e
       flash[:message] = '<pre>' +
