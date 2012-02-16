@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 # coding: utf-8
 
-require File.dirname(__FILE__) + '/video_properties.rb'
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+
+require 'video_properties.rb'
 
 class Gen2ASS
 
@@ -26,17 +28,10 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 END
 
-  @@err = $stderr
-  @@kf = "kf"
-  @@bom = true
-  def self.stderr= err
-    @err = err
-  end
-  def self.karaoke_type= kf
-    @@kf = kf
-  end
-  def self.bom= bom
-    @@bom = bom
+  def kf l=0
+    @kf == true  ? "kf" :
+    @kf == false ? "k"  :
+    @kf <= l     ? "kf" : "k"
   end
 
   def seconds_to_time n
@@ -48,16 +43,24 @@ END
       sprintf("%.2f", (n % 60))
   end
 
-  def initialize lyr, frm, fps, out
-    @out = out
+  def initialize lyr, frm, fps, out, opts={}
+
+    @kf, @out, @err, @bom = opts.values_at :kf, :out, :err, :bom
+
+    @kf ||= true
+    @out ||= $stdout
+    @err ||= $stderr
+    @bom ||= false
+
     @lyr = lyr
     @frm = frm
     @fps = fps.to_f
+
     parse
   end
 
   def parse
-    @out << BOM if @@bom
+    @out << BOM if @bom
     @out << Header
     while (@syls = nextLine)
       lineStart = nil
@@ -103,7 +106,7 @@ END
     name = ""
     marginl = marginr = marginv = "0000"
     effect = ""
-    text = "{\\k#{start_delay}}" + syls.map{|i| "{\\#{@@kf}#{(i[1]/@fps*100).round}}#{i[0]}"}.join
+    text = "{\\k#{start_delay}}" + syls.map{|i| "{\\#{kf i[1]}#{(i[1]/@fps*100).round}}#{i[0]}"}.join
 
     type + ": " + [layer, start, stop, style, name, marginl, marginr, marginv,
       effect, text].join(',') + "\n"
@@ -113,7 +116,7 @@ END
     while true
       line = @lyr.gets
       if not line
-        @@err << "End of lyr file at line #{@lyr.lineno}; exiting\n"
+        @err << "End of lyr file at line #{@lyr.lineno}; exiting\n"
         return nil
       end
 
@@ -122,7 +125,7 @@ END
       syls = line.scan(GenSyllab)
 
       if syls.empty?
-        @@err << "No valid syllabs in this line: \"#{line.chomp}\"\n"
+        @err << "No valid syllabs in this line: \"#{line.chomp}\"\n"
         next
       end
 
@@ -135,7 +138,7 @@ END
     while true
       line = @frm.gets
       if not line
-        @@err << "End of frm file at line #{@frm.lineno}; exiting\n"
+        @err << "End of frm file at line #{@frm.lineno}; exiting\n"
         return nil
       end
 
@@ -147,15 +150,27 @@ END
   end
 end
 
+def more_than_one *a
+  a.select{|a|a}.length > 1
+end
+
 if $PROGRAM_NAME == __FILE__
-  if ARGV.length != 3
-    $stderr.puts <<END
+  require 'thirdparty/trollop'
+
+  usage = <<END
 Usage : 
     #{$PROGRAM_NAME} <lyr file> <frm file> <framerate> > <ass file>
     #{$PROGRAM_NAME} <lyr file> <frm file> <video file> > <ass file>
 END
-    exit
+  opts = Trollop::options do
+    banner usage
+    opt :k, 'Discrete karaoke (\k)', :short => :k
+    opt :kf, 'Continuous karaoke (\kf) (default)', :short => :K
+    opt :t, "Continuous karaoke for syllabes longer than t seconds", :type => :float
   end
+
+  Trollop::die "Not enough arguments" if ARGV.length != 3
+  Trollop::die "Use only one option among -k, -K and -t" if more_than_one opts[:k], opts[:kf], opts[:t]
 
   lyr = ARGV[0]
   frm = ARGV[1]
@@ -165,5 +180,5 @@ END
     fps = p.fps
   end
 
-  Gen2ASS.new(File.open(lyr), File.open(frm), fps, $stdout)
+  Gen2ASS.new(File.open(lyr), File.open(frm), fps, :kf => opts[:t] || !opts[:k])
 end
