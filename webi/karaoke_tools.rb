@@ -1,9 +1,12 @@
 require 'rubygems'
 require 'ramaze'
 require 'shellwords'
-require File.dirname(__FILE__) + "/tmpdir"
 
-$karaoke_utils = File.expand_path ".", File.dirname(__FILE__)
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+require "tmpdir"
+
+$karaoke_utils = File.expand_path "..", File.dirname(__FILE__)
+
 $gen2ass= File.expand_path "toyundagen2ass.rb", $karaoke_utils
 $ass2frm = File.expand_path "ass2frm.rb", $karaoke_utils
 $toyundagen = File.expand_path "toyunda-gen.rb", $karaoke_utils
@@ -72,7 +75,7 @@ class KaraokeTools < Ramaze::Controller
             .frm file: <input type="file" name="frm" size="20"> (optional)<br>
             Framerate: <input type="text" name="fps" size="10"><br>
             <input type="radio" name="karaoke_type" value="kf" checked>\\\\kf (continuous)<br>
-            <input type="radio" name="karaoke_type" value="k">\\\\k (discrete)<br><br>
+            <input type="radio" name="karaoke_type" value="k">\\\\k (discrete)<br>
             <input type="radio" name="karaoke_type" value="hybrid">hybrid:
             <input type="text" name="t" size="5" value="0.8"><br><br>
             <input type="submit">
